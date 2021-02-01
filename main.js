@@ -54,7 +54,9 @@ async function setupEnv() {
   const xUsdcAddr = metadata.layers.layer2.externalContracts.usdc
   const clearingHouseAddr = metadata.layers.layer2.contracts.ClearingHouse.address
   const chViewerAddr = metadata.layers.layer2.contracts.ClearingHouseViewer.address
-  const ammAddr = metadata.layers.layer2.contracts.ETHUSDC.address
+  
+  const ammAddr = metadata.layers.layer2.contracts.ETHUSDC.address // Change this
+  
   const ammReaderAddr = metadata.layers.layer2.contracts.AmmReader.address
 
   const layer2Usdc = new Contract(xUsdcAddr, Erc20TokenArtifact.abi, layer2Wallet)
@@ -188,11 +190,11 @@ async function getMarkPrice(ammReader, amm) {
 }
 
 
-const SIZE = 1 // size of collateral per order
+const SIZE = 5 // size of collateral per order
 const LEVERAGE = 5
 const MAX_PRICE = 1320
-const MIN_PRICE = 1305
-const GRIDS = 10
+const MIN_PRICE = 1300
+const GRIDS = 7
 const GRID_DELTA = (MAX_PRICE - MIN_PRICE) / GRIDS
 
 var order_grid = []
@@ -223,9 +225,14 @@ function initialize_limit_orders(current_price) {
    }
 }
 
+var has_unfinished_order = false
+
 async function execute_order(order, clearingHouse, clearingHouseViewer, amm, layer2Wallet) {
+  if (has_unfinished_order) return
   try {
+    has_unfinished_order = true
     await openPosition(clearingHouse, amm, order.direction, SIZE, LEVERAGE)
+    has_unfinished_order = false
     
     console.log("execute order", order)
     // remove the order

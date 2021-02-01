@@ -190,11 +190,11 @@ async function getMarkPrice(ammReader, amm) {
 }
 
 
-const SIZE = 5 // size of collateral per order
+const SIZE = 2 // size of collateral per order
 const LEVERAGE = 5
-const MAX_PRICE = 1320
+const MAX_PRICE = 1330
 const MIN_PRICE = 1300
-const GRIDS = 7
+const GRIDS = 8
 const GRID_DELTA = (MAX_PRICE - MIN_PRICE) / GRIDS
 
 var order_grid = []
@@ -225,6 +225,10 @@ function initialize_limit_orders(current_price) {
    }
 }
 
+function print_order(order) {
+   console.log(`id: ${order.id}, grid_id: ${order.grid_id}, price: ${order.price}, direction: ${order.direction == LONG_POS ? 'long' : 'short'}`)
+}
+
 var has_unfinished_order = false
 
 async function execute_order(order, clearingHouse, clearingHouseViewer, amm, layer2Wallet) {
@@ -238,7 +242,7 @@ async function execute_order(order, clearingHouse, clearingHouseViewer, amm, lay
     // remove the order
     limit_orders = limit_orders.filter(item => item.id !== order.id)
     
-    // create a close order
+    // create an opposite order
     var new_direction = 1 - order.direction
     var new_grid_id = order.direction == LONG_POS ? order.grid_id + 1 : order.grid_id - 1
     var new_order = {
@@ -256,6 +260,11 @@ async function execute_order(order, clearingHouse, clearingHouseViewer, amm, lay
   }
       
   await printInfo(clearingHouseViewer, amm, layer2Wallet)
+  
+  console.log("current orders:")
+  for (var i = 0; i < limit_orders.length; i++) {
+    print_order(limit_orders[i])
+  }
 }
 
 function sleep(ms) {
@@ -345,7 +354,7 @@ async function main() {
   
   console.log("initial orders:")
   for (var i = 0; i < limit_orders.length; i++) {
-    console.log(limit_orders[i])
+    print_order(limit_orders[i])
   }
   
   // test execute order

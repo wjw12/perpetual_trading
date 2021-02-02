@@ -17,6 +17,14 @@ const PNL_OPTION_SPOT_PRICE = 0
 const ACTION_DEPOSIT = 0
 const ACTION_WITHDRAW = 1
 
+
+const SIZE = 3 // size of collateral per order
+const LEVERAGE = 5
+const MAX_PRICE = 1360
+const MIN_PRICE = 1250
+const GRIDS = 20
+const GRID_DELTA = (MAX_PRICE - MIN_PRICE) / GRIDS
+
 const ABI_AMB_LAYER1 = [
   "event RelayedMessage(address indexed sender, address indexed executor, bytes32 indexed messageId, bool status)",
   "event AffirmationCompleted( address indexed sender, address indexed executor, bytes32 indexed messageId, bool status)",
@@ -190,12 +198,6 @@ async function getMarkPrice(ammReader, amm) {
 }
 
 
-const SIZE = 2 // size of collateral per order
-const LEVERAGE = 5
-const MAX_PRICE = 1330
-const MIN_PRICE = 1300
-const GRIDS = 8
-const GRID_DELTA = (MAX_PRICE - MIN_PRICE) / GRIDS
 
 var order_grid = []
 
@@ -238,7 +240,8 @@ async function execute_order(order, clearingHouse, clearingHouseViewer, amm, lay
     await openPosition(clearingHouse, amm, order.direction, SIZE, LEVERAGE)
     has_unfinished_order = false
     
-    console.log("execute order", order)
+    console.log("execute order")
+    print_order(order)
     // remove the order
     limit_orders = limit_orders.filter(item => item.id !== order.id)
     
@@ -369,10 +372,6 @@ async function main() {
     await sleep(1000)
   }
 }
-
-
-
-
 
 
 main()
